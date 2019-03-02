@@ -79,11 +79,10 @@ https://github.com/medcl/elasticsearch-dump/releases
 
 
 ## Compile:
-
 if download version is not fill you environment,you may try to compile it yourself. `go` required.
 
 `make build`
-
+* go version >= 1.7
 
 ## Options
 
