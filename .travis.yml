@@ -1,6 +1,10 @@
 language: go
 os:
   - osx
+
+env:
+  global:
+    - TRAVIS_GO_VERSION="1.10"
 go:
   - 1.10
 
