@@ -14,6 +14,7 @@ import (
 	pb "gopkg.in/cheggaaa/pb.v1"
 	"os"
 	"io"
+	"io/ioutil"
 )
 
 func main() {
@@ -442,7 +443,13 @@ func (c *Migrator) recoveryIndexSettings(sourceIndexRefreshSettings map[string]i
 func (c *Migrator) ClusterVersion(host string, auth *Auth,proxy string) (*ClusterVersion, []error) {
 
 	url := fmt.Sprintf("%s", host)
-	_, body, errs := Get(url, auth,proxy)
+	resp, body, errs := Get(url, auth,proxy)
+
+	if resp!=nil&& resp.Body!=nil{
+		io.Copy(ioutil.Discard, resp.Body)
+		defer resp.Body.Close()
+	}
+
 	if errs != nil {
 		log.Error(errs)
 		return nil, errs

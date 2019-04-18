@@ -107,12 +107,15 @@ func (s *ESAPIV5) NewScroll(indexNames string,scrollTime string,docBufferCount i
 
         resp, body, errs := Post(url, s.Auth,jsonBody,s.HttpProxy)
 
+        if resp!=nil&& resp.Body!=nil{
+                io.Copy(ioutil.Discard, resp.Body)
+                defer resp.Body.Close()
+        }
+
         if errs != nil {
                 log.Error(errs)
                 return nil,errs[0]
         }
-        io.Copy(ioutil.Discard, resp.Body)
-        defer resp.Body.Close()
 
         if resp.StatusCode != 200 {
                 return nil,errors.New(body)
@@ -140,12 +143,16 @@ func (s *ESAPIV5) NextScroll(scrollTime string,scrollId string)(*Scroll,error)  
 
         url:=fmt.Sprintf("%s/_search/scroll?scroll=%s&scroll_id=%s", s.Host, scrollTime, id)
         resp,body, errs := Get(url,s.Auth,s.HttpProxy)
+
+        if resp!=nil&& resp.Body!=nil{
+                io.Copy(ioutil.Discard, resp.Body)
+                defer resp.Body.Close()
+        }
+
         if errs != nil {
                 log.Error(errs)
                 return nil,errs[0]
         }
-        io.Copy(ioutil.Discard, resp.Body)
-        defer resp.Body.Close()
 
         if resp.StatusCode != 200 {
                 return nil,errors.New(body)

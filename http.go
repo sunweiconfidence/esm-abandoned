@@ -25,16 +25,26 @@ import (
 	"errors"
 	"bytes"
 	"net/url"
+	"crypto/tls"
 )
 
 func Get(url string,auth *Auth,proxy string) (*http.Response, string, []error) {
 	request := gorequest.New()
+
+	tr := &http.Transport{
+		DisableKeepAlives: true,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	request.Transport=tr
+
+
 	if(auth!=nil){
 		request.SetBasicAuth(auth.User,auth.Pass)
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	
+	request.Header["Content-Type"]= "application/json"
+	//request.Header.Set("Content-Type", "application/json")
+
 	if(len(proxy)>0){
 		request.Proxy(proxy)
 	}
@@ -46,11 +56,17 @@ func Get(url string,auth *Auth,proxy string) (*http.Response, string, []error) {
 
 func Post(url string,auth *Auth, body string,proxy string)(*http.Response, string, []error)  {
 	request := gorequest.New()
+	tr := &http.Transport{
+		DisableKeepAlives: true,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	request.Transport=tr
+
 	if(auth!=nil){
 		request.SetBasicAuth(auth.User,auth.Pass)
 	}
 
-	request.Header.Set("Content-Type", "application/json")
+	request.Header["Content-Type"]="application/json"
 	
 	if(len(proxy)>0){
 		request.Proxy(proxy)
@@ -58,7 +74,7 @@ func Post(url string,auth *Auth, body string,proxy string)(*http.Response, strin
 
 	request.Post(url)
 
-	if(len(body)>0){
+	if(len(body)>0) {
 		request.Send(body)
 	}
 
@@ -76,6 +92,7 @@ func newDeleteRequest(client *http.Client,method, urlStr string) (*http.Request,
 	if err != nil {
 		return nil, err
 	}
+
 	req := &http.Request{
 		Method:     method,
 		URL:        u,
@@ -90,6 +107,7 @@ func newDeleteRequest(client *http.Client,method, urlStr string) (*http.Request,
 
 func Request(method string,r string,auth *Auth,body *bytes.Buffer,proxy string)(string,error)  {
 
+	//TODO use global client
 	var client *http.Client
 	client = &http.Client{}
 	if(len(proxy)>0){
@@ -97,11 +115,22 @@ func Request(method string,r string,auth *Auth,body *bytes.Buffer,proxy string)(
 		if(err!=nil){
 			log.Error(err)
 		}else{
-			transport := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+			transport := &http.Transport{
+				Proxy: http.ProxyURL(proxyURL),
+				DisableKeepAlives: true,
+			}
 			client = &http.Client{Transport: transport}
 		}
 	}
 
+	tr := &http.Transport{
+		DisableKeepAlives: true,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+	},
+	}
+
+	client.Transport=tr
 
 	var reqest *http.Request
 	if(body!=nil){
@@ -120,6 +149,11 @@ func Request(method string,r string,auth *Auth,body *bytes.Buffer,proxy string)(
 	if errs != nil {
 		log.Error(errs)
 		return "",errs
+	}
+
+	if resp!=nil&& resp.Body!=nil{
+		//io.Copy(ioutil.Discard, resp.Body)
+		defer resp.Body.Close()
 	}
 
 	if resp.StatusCode != 200 {

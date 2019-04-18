@@ -96,9 +96,10 @@ type Config struct {
 	ShardsCount       int    `long:"shards"            description:"set a number of shards on newly created indexes"`
 	SourceIndexNames  string `short:"x" long:"src_indexes" description:"indexes name to copy,support regex and comma separated list" default:"_all"`
 	TargetIndexName   string `short:"y" long:"dest_index" description:"indexes name to save, allow only one indexname, original indexname will be used if not specified" default:""`
+	OverrideTypeName  string `short:"u" long:"type_override" description:"override type name" default:""`
 	WaitForGreen      bool   `long:"green"             description:"wait for both hosts cluster status to be green before dump. otherwise yellow is okay"`
 	LogLevel          string `short:"v" long:"log"            description:"setting log level,options:trace,debug,info,warn,error"  default:"INFO"`
-	DumpOutFile       string  `short:"o" long:"output_file"            description:"output documents of source index into local file" `
+	DumpOutFile       string `short:"o" long:"output_file"            description:"output documents of source index into local file" `
 	DumpInputFile     string  `short:"i" long:"input_file"            description:"indexing from local dump file" `
 	SourceProxy       string    `long:"source_proxy"            description:"set proxy to source http connections, ie: http://127.0.0.1:8080"`
 	TargetProxy       string    `long:"dest_proxy"            description:"set proxy to target http connections, ie: http://127.0.0.1:8080"`

@@ -58,15 +58,21 @@ func (c *Migrator) NewBulkWorker(docCount *int, pb *pb.ProgressBar, wg *sync.Wai
 			}
 
 			var tempDestIndexName string
+			var tempTargetTypeName string
 			tempDestIndexName = docI["_index"].(string)
+			tempTargetTypeName = docI["_type"].(string)
 
 			if c.Config.TargetIndexName != "" {
 				tempDestIndexName = c.Config.TargetIndexName
 			}
 
+			if c.Config.OverrideTypeName != "" {
+				tempTargetTypeName = c.Config.OverrideTypeName
+			}
+
 			doc := Document{
 				Index:  tempDestIndexName,
-				Type:   docI["_type"].(string),
+				Type:   tempTargetTypeName,
 				source: docI["_source"].(map[string]interface{}),
 				Id:     docI["_id"].(string),
 			}

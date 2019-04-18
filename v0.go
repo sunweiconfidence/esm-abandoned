@@ -37,7 +37,12 @@ type ESAPIV0 struct {
 func (s *ESAPIV0) ClusterHealth() *ClusterHealth {
 
         url := fmt.Sprintf("%s/_cluster/health", s.Host)
-        _, body, errs := Get(url, s.Auth,s.HttpProxy)
+        r, body, errs := Get(url, s.Auth,s.HttpProxy)
+
+        if r!=nil&& r.Body!=nil{
+                io.Copy(ioutil.Discard, r.Body)
+                defer r.Body.Close()
+        }
 
         if errs != nil {
                 return &ClusterHealth{Name: s.Host, Status: "unreachable"}
@@ -80,11 +85,15 @@ func (s *ESAPIV0) GetIndexSettings(indexNames string) (*Indexes, error) {
 
         url := fmt.Sprintf("%s/%s/_settings", s.Host, indexNames)
         resp, body, errs := Get(url, s.Auth,s.HttpProxy)
+
+        if resp!=nil&& resp.Body!=nil{
+                io.Copy(ioutil.Discard, resp.Body)
+                defer resp.Body.Close()
+        }
+
         if errs != nil {
                 return nil, errs[0]
         }
-        io.Copy(ioutil.Discard, resp.Body)
-        defer resp.Body.Close()
 
         if resp.StatusCode != 200 {
                 return nil, errors.New(body)
@@ -104,12 +113,17 @@ func (s *ESAPIV0) GetIndexSettings(indexNames string) (*Indexes, error) {
 func (s *ESAPIV0) GetIndexMappings(copyAllIndexes bool, indexNames string) (string, int, *Indexes, error) {
         url := fmt.Sprintf("%s/%s/_mapping", s.Host, indexNames)
         resp, body, errs := Get(url, s.Auth,s.HttpProxy)
+
+        if resp!=nil&& resp.Body!=nil{
+                io.Copy(ioutil.Discard, resp.Body)
+                defer resp.Body.Close()
+        }
+
         if errs != nil {
                 log.Error(errs)
                 return "", 0, nil, errs[0]
         }
-        io.Copy(ioutil.Discard, resp.Body)
-        defer resp.Body.Close()
+
 
         if resp.StatusCode != 200 {
                 return "", 0, nil, errors.New(body)
@@ -288,7 +302,11 @@ func (s *ESAPIV0) Refresh(name string) (err error) {
 
         url := fmt.Sprintf("%s/%s/_refresh", s.Host, name)
 
-        Post(url,s.Auth,"",s.HttpProxy)
+        resp,_,_:=Post(url,s.Auth,"",s.HttpProxy)
+        if resp!=nil&& resp.Body!=nil{
+                io.Copy(ioutil.Discard, resp.Body)
+                defer resp.Body.Close()
+        }
 
         return nil
 }
@@ -327,14 +345,15 @@ func (s *ESAPIV0) NewScroll(indexNames string, scrollTime string, docBufferCount
         }
         resp, body, errs := Post(url, s.Auth,jsonBody,s.HttpProxy)
 
-
+        if resp!=nil&& resp.Body!=nil{
+                io.Copy(ioutil.Discard, resp.Body)
+                defer resp.Body.Close()
+        }
 
         if err != nil {
                 log.Error(errs)
                 return nil, errs[0]
         }
-        io.Copy(ioutil.Discard, resp.Body)
-        defer resp.Body.Close()
 
         log.Trace("new scroll,",url, body)
 
@@ -362,6 +381,12 @@ func (s *ESAPIV0) NextScroll(scrollTime string, scrollId string) (*Scroll, error
         id := bytes.NewBufferString(scrollId)
         url := fmt.Sprintf("%s/_search/scroll?scroll=%s&scroll_id=%s", s.Host, scrollTime, id)
         resp, body, errs := Get(url, s.Auth,s.HttpProxy)
+
+        if resp!=nil&& resp.Body!=nil{
+                io.Copy(ioutil.Discard, resp.Body)
+                defer resp.Body.Close()
+        }
+
         if errs != nil {
                 log.Error(errs)
                 return nil, errs[0]
@@ -370,9 +395,6 @@ func (s *ESAPIV0) NextScroll(scrollTime string, scrollId string) (*Scroll, error
         if resp.StatusCode != 200 {
                 return nil, errors.New(body)
         }
-
-        io.Copy(ioutil.Discard, resp.Body)
-        defer resp.Body.Close()
 
         log.Trace("next scroll,",url,body)
 
