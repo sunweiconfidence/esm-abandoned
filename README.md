@@ -74,6 +74,13 @@ use sliced scroll(only available in elasticsearch v5) to speed scroll, and updat
  ./bin/esm -s=http://192.168.3.206:9200 -d=http://localhost:9200 -n=elastic:changeme -f --copy_settings --copy_mappings -x=bestbuykaggle  --sliced_scroll_size=5 --shards=50 --refresh
 ```
 
+migrate 5.x to 6.x and unify all the types to `doc`
+```
+./esm -s http://source_es:9200 -x "source_index*"  -u "doc" -w 10 -b 10 - -t "10m" -d https://target_es:9200 -m elastic:passwd -n elastic:passwd -c 5000 
+
+```
+
+
 ## Download
 https://github.com/medcl/elasticsearch-dump/releases
 
@@ -128,4 +135,5 @@ From       | To
 5.0 | 2.x
 5.0 | 5.0
 6.x | 6.x
+5.x | 6.x
 
